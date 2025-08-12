@@ -1,0 +1,46 @@
+<html>
+<head>
+    <title>Parsed Content</title>
+    <style>
+        #one {
+            height: auto;
+            width: 400px;
+            background-color: white;
+            border-style: solid;
+            border-width: 1px;
+            border-color: black;
+            padding: 20px;
+        }
+    </style>
+    <script src="jquery-3.7.1.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            let parsedData = localStorage.getItem("parsed_resume");
+            let userName = localStorage.getItem("user_name");
+
+            if (!parsedData) {
+                $("#resumeData").html("<p style='color:red;'>No resume data found. Please register first.</p>");
+                return;
+            }
+
+            let data = JSON.parse(parsedData);
+
+            let html = `
+                <p><strong>Name:</strong> ${userName || "N/A"}</p>
+                <p><strong>Technical Skills:</strong> ${Array.isArray(data.skills) ? data.skills.join(", ") : "N/A"}</p>
+                <p><strong>Personal Skills:</strong> ${Array.isArray(data.personal_skills) ? data.personal_skills.join(", ") : "N/A"}</p>
+            `;
+
+            $("#resumeData").html(html);
+        });
+    </script>
+</head>
+<body>
+    <center>
+        <div id="one">
+            <h4>Extracted Details from Resume</h4>
+            <div id="resumeData"></div>
+        </div>
+    </center>
+</body>
+</html>
