@@ -1,81 +1,38 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Register Page</title>
-    <style>
-        div {
-            height: 200px;
-            width: 500px;
-            margin-top: 80px;
-            border-color: black;
-            border-width: 2px;
-            border-style: solid;
-        }
-
-        a {
-            display: inline-block;
-            margin-top: 20px;
-        }
-    </style>
-    <script src="jquery-3.7.1.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            const max_size = 10 * 1024 * 1024;
-
-            $("#resume_file").on("change", function () {
-                let file = this.files[0];
-                if (file && file.size > max_size) {
-                    alert("File is too large! Max 10 MB is allowed.");
-                    $(this).val("");
-                }
-            });
-
-            $("#register").on("submit", function (e) {
-                e.preventDefault();
-
-                let formData = new FormData(this);
-
-                $.ajax({
-                    url: "http://localhost:8000/api/register",
-                    method: "POST",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function (response) {
-                        alert("Registration successful!");
-                        console.log(response);
-
-                        localStorage.setItem("user_name", formData.get("name"));
-                        localStorage.setItem("parsed_resume", JSON.stringify(response.parsed_resume));
-
-                        window.location.href = "result.html";
-                    },
-                    error: function (xhr, status, error) {
-                        alert("Registration failed!");
-                        console.error(error);
-                    }
-                });
-            });
-        });
-    </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DARKCONQ</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-    <center>
-        <h1>REGISTER FORM</h1>
-        <div style="background-color: white;">
-            <form id="register" enctype="multipart/form-data">
-                <h3 style="margin-top: 40px;">
-                    Name: <input type="text" placeholder="Enter your name" name="name" required />
-                </h3>
 
-                <h3 style="padding-left: 80px;">
-                    Upload Resume: <input type="file" id="resume_file" name="resume_file" required />
-                </h3>
+  <header>
+    <div class="logo">DARKCONQ</div>
+    <nav>
+      <ul>
+        <li><a href="#">Home</a></li>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Pricing</a></li>
+        <li><a href="login.html" class="login-button">Login</a></li>
+      </ul>
+    </nav>
+  </header>
 
-                <button type="submit">Submit</button>
-            </form>
-        </div>
+  <main class="hero">
+    <div class="hero-text">
+      <h1>Step In Confident —<br>AI-Driven Prep for<br>Every Interview Stage!</h1>
+      <button class="cta-button">Discover More</button>
+    </div>
+    <div class="hero-image">
+      <img src="person.png" alt="Person using tablet" />
+    </div>
+  </main>
 
-    </center>
+  <footer>
+    <p>Copyright © 2025</p>
+  </footer>
+
 </body>
 </html>
