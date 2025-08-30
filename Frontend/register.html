@@ -161,7 +161,7 @@
                         console.log(response);
 
                         localStorage.setItem("user_name", formData.get("name"));
-                        localStorage.setItem("parsed_resume", JSON.stringify(response.parsed_resume));
+                        localStorage.setItem("resume_id", response.resume_id);
 
                         window.location.href = "result.html";
                     },

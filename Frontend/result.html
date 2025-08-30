@@ -90,40 +90,48 @@
 
     <script src="jquery-3.7.1.min.js"></script>
     <script>
-        $(document).ready(function () {
-            $(".hamburger").on("click", function () {
-                $(".sidebar").toggleClass("active");
-            });
-
-            let parsedData = localStorage.getItem("parsed_resume");
-            let userName = localStorage.getItem("user_name");
-
-            if (!parsedData) {
-                $("#resumeData").html("<p style='color:red;'>No resume data found. Please register first.</p>");
-                return;
-            }
-
-            let data = JSON.parse(parsedData);
-
-            let skillsList = Array.isArray(data.skills)
-                ? `<ul>${data.skills.map(skill => `<li>${skill}</li>`).join("")}</ul>`
-                : "N/A";
-
-            let personalSkillsList = Array.isArray(data.personal_skills)
-                ? `<ul>${data.personal_skills.map(skill => `<li>${skill}</li>`).join("")}</ul>`
-                : "N/A";
-
-            let html = `
-                <p><strong>Name:</strong> ${userName || "N/A"}</p>
-                <div class="section-title">Technical Skills:</div>
-                ${skillsList}
-                <div class="section-title">Personal Skills:</div>
-                ${personalSkillsList}
-            `;
-
-            $("#resumeData").html(html);
+    $(document).ready(function () {
+        $(".hamburger").on("click", function () {
+            $(".sidebar").toggleClass("active");
         });
-    </script>
+
+        let resumeId = localStorage.getItem("resume_id");
+        let userName = localStorage.getItem("user_name");
+
+        if (!resumeId) {
+            $("#resumeData").html("<p style='color:red;'>No resume ID found. Please register first.</p>");
+            return;
+        }
+
+        $.ajax({
+            url: `http://localhost:8000/api/parsed_resume/${resumeId}`,
+            method: "GET",
+            success: function (data) {
+                let skillsList = Array.isArray(data.skills)
+                    ? `<ul>${data.skills.map(skill => `<li>${skill}</li>`).join("")}</ul>`
+                    : "N/A";
+
+                let personalSkillsList = Array.isArray(data.personal_skills)
+                    ? `<ul>${data.personal_skills.map(skill => `<li>${skill}</li>`).join("")}</ul>`
+                    : "N/A";
+
+                let html = `
+                    <p><strong>Name:</strong> ${userName || "N/A"}</p>
+                    <div class="section-title">Technical Skills:</div>
+                    ${skillsList}
+                    <div class="section-title">Personal Skills:</div>
+                    ${personalSkillsList}
+                `;
+
+                $("#resumeData").html(html);
+            },
+            error: function () {
+                $("#resumeData").html("<p style='color:red;'>Failed to load resume data. Please try again.</p>");
+            }
+        });
+    });
+</script>
+
 </head>
 <body>
     <div class="hamburger">&#9776;</div>

@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Form, File, UploadFile
 from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from .resume import extract_text, parse_resume
+from DB.db_connection import store_resume, get_resume_by_id  # ✅ Import MongoDB helpers
 
 router = APIRouter()
-
-# Temporary in-memory store (for testing without DB)
-parsed_resume_data = {}
 
 @router.post("/register")
 async def register_user(
@@ -17,19 +16,26 @@ async def register_user(
     parsed_data = parse_resume(resume_text)
 
     parsed_data["name"] = name
+    parsed_data["resume_filename"] = resume_file.filename
 
-    parsed_resume_data["parsed_resume"] = parsed_data
-    parsed_resume_data["resume_filename"] = resume_file.filename
+    resume_id = store_resume(parsed_data)  # ✅ Store in MongoDB
 
-    return JSONResponse(content={
+    if "_id" in parsed_data:
+        parsed_data["_id"] = str(parsed_data["_id"])
+
+    return JSONResponse(content=jsonable_encoder({
         "message": "Registration successful",
-        "parsed_resume": parsed_data,
-        "resume_filename": resume_file.filename
-    })
+        "resume_id": str(resume_id),
+        "parsed_resume": parsed_data
+    }))
 
-@router.get("/parsed_resume")
-def get_parsed_resume():
-    if not parsed_resume_data:
-        return JSONResponse(content={"error": "No resume data found"}, status_code=404)
-    
-    return JSONResponse(content=parsed_resume_data["parsed_resume"])
+@router.get("/parsed_resume/{resume_id}")
+def get_parsed_resume(resume_id: str):
+    resume = get_resume_by_id(resume_id)  # ✅ Retrieve from MongoDB
+    if not resume:
+        return JSONResponse(content={"error": "Resume not found"}, status_code=404)
+
+    if "_id" in resume:
+        resume["_id"] = str(resume["_id"])
+
+    return JSONResponse(content=jsonable_encoder(resume))
