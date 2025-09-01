@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DARKCONQ - Result</title>
+    <link href="https://fonts.googleapis.com/css2?family=Irish+Grover&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: url("bg.avif") no-repeat center center/cover;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #1b23d1;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+        }
+
+        header .logo {
+            font-family: 'Irish Grover', cursive;
+            font-size: 24px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            gap: 25px;
+        }
+
+        main h1 {
+            background-color: white;
+            color: black;
+            font-size: 32px;
+            font-weight: bold;
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.3);
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .buttons button {
+            border: none;
+            font-weight: bold;
+            font-size: 20px;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(0,0,0,0.3);
+            transition: 0.3s;
+            min-width: 200px;
+        }
+
+        .retry {
+            background: linear-gradient(90deg, #b6002a, #8c0021);
+            color: white;
+        }
+
+        .retry:hover {
+            background: #8c0021;
+        }
+
+        .report {
+            background: linear-gradient(90deg, #63b84d, #348a2d);
+            color: black;
+        }
+
+        .report:hover {
+            background: #348a2d;
+            color: white;
+        }
+
+        footer {
+            background-color: #1b23d1;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">DARKCONQ</div>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Pricing</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1>WELL DONE!</h1>
+        <div class="buttons">
+            <button class="retry" onclick="window.location.href='question.html'">RETRY</button>
+            <button class="report" onclick="window.location.href='report.html'">REPORT</button>
+        </div>
+    </main>
+
+    <footer>
+        Copyright © 2025
+    </footer>
+</body>
+</html>
