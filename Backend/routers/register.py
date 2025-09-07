@@ -2,7 +2,7 @@ from fastapi import APIRouter, Form, File, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from .resume import extract_text, parse_resume
-from DB.db_connection import store_resume, get_resume_by_id  # ✅ Import MongoDB helpers
+from DB.db_connection import store_resume, get_resume_by_id  
 
 router = APIRouter()
 
