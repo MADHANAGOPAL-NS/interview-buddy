@@ -2,11 +2,12 @@ import pdfplumber
 import docx
 import re
 import io
-import spacy
+#import spacy
 
-nlp = spacy.load("en_core_web_sm")
+#lp = spacy.load("en_core_web_sm")
 
 def extract_text(file_bytes: bytes, filename: str) -> str:
+    
     ext = filename.lower().split('.')[-1]
 
     if ext == "pdf":
@@ -28,7 +29,7 @@ def extract_text_from_docx(file_bytes: bytes) -> str:
 
 def parse_resume(text: str) -> dict:
 
-    skills = re.findall(
+    technical_skills = re.findall(
         r"\b(Python|FastAPI|HTML|CSS|JavaScript|SQL|DSA|Web Development|Machine Learning)\b", text
     )
     personal_skills = re.findall(
@@ -40,7 +41,7 @@ def parse_resume(text: str) -> dict:
 
     return {
         
-        "skills": list(set(skills)),
+        "technical_skills": list(set(technical_skills)),
         "personal_skills": list(set([skill.lower() for skill in personal_skills]))
 
     }
