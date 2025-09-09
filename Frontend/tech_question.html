@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Technical Round - DARKCONQ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .technical-container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 40px;
+            width: 600px;
+            box-shadow: 0px 8px 24px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .technical-container h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #1f2937;
+        }
+
+        .voice-toggle {
+            margin-bottom: 20px;
+            font-size: 16px;
+            color: #374151;
+        }
+
+        .question-box {
+            background-color: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 20px;
+            font-size: 20px;
+            font-weight: 500;
+            color: #1f2937;
+            min-height: 100px;
+            margin-bottom: 30px;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .record-button, .next-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .record-button {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .record-button:hover {
+            background-color: #059669;
+        }
+
+        .next-button {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .next-button:hover {
+            background-color: #1d4ed8;
+        }
+
+        .suggestion-box {
+            background-color: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 16px;
+            color: #92400e;
+            min-height: 60px;
+            text-align: left;
+        }
+    </style>
+    <script src="jquery-3.7.1.min.js"></script>
+</head>
+<body>
+
+    <div class="technical-container">
+        <h2>Technical Round</h2>
+        <div class="voice-toggle">
+            <label><input type="checkbox" id="voiceToggle" checked> 🔊 Read questions aloud</label>
+        </div>
+        <div class="question-box" id="technicalQuestionBox">
+            Loading technical question...
+        </div>
+        <div class="controls">
+            <button class="record-button" id="startRecording">🎙️ Start Recording</button>
+            <button class="next-button">Next Question</button>
+        </div>
+        <div class="suggestion-box" id="suggestionBox">
+            Suggestions based on your answer will appear here.
+        </div>
+    </div>
+
+<script>
+$(document).ready(function () {
+    let questions = [];
+    let currentIndex = 0;
+    let isMaleVoice = true;
+    let maleVoice = null;
+    let femaleVoice = null;
+    let voicesReady = false;
+
+    function assignVoices() {
+        const allVoices = speechSynthesis.getVoices();
+        maleVoice = allVoices.find(v => v.name.includes("David") || v.name.includes("Alex")) || allVoices[0];
+        femaleVoice = allVoices.find(v => v.name.includes("Samantha") || v.name.includes("Zira")) || allVoices[1] || allVoices[0];
+        voicesReady = true;
+    }
+
+    function extractQuestionOnly(text) {
+        const parts = text.split(":");
+        return parts.length > 1 ? parts.slice(1).join(":").trim() : text;
+    }
+
+    function typeAndSpeakPhrases(text, isMale, callback) {
+        const phrases = text.match(/[^.,!?]+[.,!?]?/g) || [text];
+        let i = 0;
+        $("#TechnicalQuestionBox").html("");
+
+        function nextPhrase() {
+            if (i < phrases.length) {
+                const phrase = phrases[i].trim();
+                $("#TechnicalQuestionBox").append(phrase + " ");
+
+                if ($("#voiceToggle").is(":checked") && voicesReady) {
+                    const voiceText = extractQuestionOnly(phrase);
+                    const utterance = new SpeechSynthesisUtterance(voiceText);
+                    utterance.voice = isMale ? maleVoice : femaleVoice;
+                    utterance.lang = 'en-US';
+                    utterance.rate = 1.1;
+                    speechSynthesis.speak(utterance);
+                }
+
+                i++;
+                const delay = Math.max(600, phrase.length * 40);
+                setTimeout(nextPhrase, delay);
+            } else {
+                if (callback) callback();
+            }
+        }
+
+        nextPhrase();
+    }
+
+    function showQuestion(index) {
+        if (index < questions.length) {
+            const questionText = questions[index];
+            $("#suggestionBox").html("Suggestions based on your answer will appear here.");
+            typeAndSpeakPhrases(questionText, isMaleVoice);
+            isMaleVoice = !isMaleVoice;
+        } else {
+            const finalMessage = "Thank you for participating in the technical round. We appreciate the effort you put into your responses and the clarity in your approach. We wish you continued success in your career journey.";
+            $("#technicalQuestionBox").html("<p>Technical round complete. Thank you!</p>");
+            $(".next-button").hide();
+            $("#suggestionBox").html("");
+            if ($("#voiceToggle").is(":checked") && voicesReady) {
+                const utterance = new SpeechSynthesisUtterance(finalMessage);
+                utterance.voice = maleVoice;
+                utterance.lang = 'en-US';
+                utterance.rate = 1.1;
+                speechSynthesis.speak(utterance);
+            }
+        }
+    }
+
+    $(".next-button").on("click", function () {
+        currentIndex++;
+        showQuestion(currentIndex);
+    });
+
+    $("#startRecording").on("click", function () {
+        if (!("webkitSpeechRecognition" in window)) {
+            alert("Voice recognition not supported in this browser.");
+            return;
+        }
+
+        const recognition = new webkitSpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "en-US";
+
+        $("#suggestionBox").html("🎙️ Listening... Please speak your answer.");
+
+        recognition.onresult = function (event) {
+            const transcript = event.results[0][0].transcript.trim();
+            const questionText = questions[currentIndex];
+
+            $("#suggestionBox").html("⏳ Processing your answer...");
+
+            $.ajax({
+                url: "http://localhost:8000/api/technical_questions/feedback",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    question: questionText,
+                    answer: transcript
+                }),
+                success: function (response) {
+                    $("#suggestionBox").html(response.feedback || "No suggestions received.");
+                },
+                error: function () {
+                    $("#suggestionBox").html("Failed to fetch feedback. Please try again.");
+                }
+            });
+        };
+
+        recognition.onerror = function () {
+            $("#suggestionBox").html("🎤 Voice recognition failed. Please try again.");
+        };
+
+        recognition.start();
+    });
+
+    let resumeId = localStorage.getItem("resume_id");
+    if (!resumeId) {
+        $("#technicalQuestionBox").html("<p>Resume ID not found. Please register first.</p>");
+        $(".next-button").hide();
+        return;
+    }
+
+    speechSynthesis.onvoiceschanged = () => {
+        assignVoices();
+        $.ajax({
+            url: `http://localhost:8000/api/technical_questions/start?resume_id=${resumeId}`,
+            type: "GET",
+            success: function (response) {
+                questions = response.questions;
+                showQuestion(currentIndex);
+            },
+            error: function () {
+                $("#technicalQuestionBox").html("<p>Failed to load Technical questions.</p>");
+            }
+        });
+    };
+});
+</script>
+
+</body>
+</html>
