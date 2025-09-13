@@ -2,9 +2,9 @@ import pdfplumber
 import docx
 import re
 import io
-#import spacy
+import spacy
 
-#lp = spacy.load("en_core_web_sm")
+nlp = spacy.load("en_core_web_sm")
 
 def extract_text(file_bytes: bytes, filename: str) -> str:
     
