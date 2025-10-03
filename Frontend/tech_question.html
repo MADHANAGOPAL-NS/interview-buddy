@@ -104,7 +104,7 @@
         <div class="voice-toggle">
             <label><input type="checkbox" id="voiceToggle" checked> 🔊 Read questions aloud</label>
         </div>
-        <div class="question-box" id="technicalQuestionBox">
+        <div class="question-box" id="TechnicalQuestionBox">
             Loading technical question...
         </div>
         <div class="controls">
@@ -115,7 +115,8 @@
             Suggestions based on your answer will appear here.
         </div>
     </div>
-
+    
+   
 <script>
 $(document).ready(function () {
     let questions = [];
@@ -124,6 +125,11 @@ $(document).ready(function () {
     let maleVoice = null;
     let femaleVoice = null;
     let voicesReady = false;
+
+    //scoring variables
+    let scores=0;
+    let maxScore=5*2;
+    
 
     function assignVoices() {
         const allVoices = speechSynthesis.getVoices();
@@ -174,71 +180,109 @@ $(document).ready(function () {
             typeAndSpeakPhrases(questionText, isMaleVoice);
             isMaleVoice = !isMaleVoice;
         } else {
-            const finalMessage = "Thank you for participating in the technical round. We appreciate the effort you put into your responses and the clarity in your approach. We wish you continued success in your career journey.";
-            $("#technicalQuestionBox").html("<p>Technical round complete. Thank you!</p>");
-            $(".next-button").hide();
-            $("#suggestionBox").html("");
-            if ($("#voiceToggle").is(":checked") && voicesReady) {
-                const utterance = new SpeechSynthesisUtterance(finalMessage);
-                utterance.voice = maleVoice;
-                utterance.lang = 'en-US';
-                utterance.rate = 1.1;
-                speechSynthesis.speak(utterance);
-            }
+           showFinalResults();
         }
+    }
+    function showFinalResults() {
+        $("#TechnicalQuestionBox").html(
+            `<p>✅ Technical round complete!</p>
+             <p>📊 Your Overall Score: ${scores}/${maxScore} 
+             (${((scores / maxScore) * 100).toFixed(2)}%)</p>`
+        );
+        $(".next-button").hide();
+        $("#startRecording").hide();
+        $("#retryButton").hide();
+        $("#suggestionBox").html("🎉 Well done!");
     }
 
     $(".next-button").on("click", function () {
         currentIndex++;
         showQuestion(currentIndex);
     });
+let recognition;
+let isRecording = false;
 
-    $("#startRecording").on("click", function () {
-        if (!("webkitSpeechRecognition" in window)) {
-            alert("Voice recognition not supported in this browser.");
-            return;
-        }
+$("#startRecording").on("click", function () {
+    if (!("webkitSpeechRecognition" in window)) {
+        alert("Voice recognition not supported in this browser.");
+        return;
+    }
 
-        const recognition = new webkitSpeechRecognition();
-        recognition.continuous = false;
+    if (!isRecording) {
+        // ✅ Start recording
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = true;
         recognition.interimResults = false;
         recognition.lang = "en-US";
 
         $("#suggestionBox").html("🎙️ Listening... Please speak your answer.");
+        $("#startRecording").text("⏹️ Stop Recording").css("background-color", "#dc2626"); // 🔴 red
+        
 
         recognition.onresult = function (event) {
             const transcript = event.results[0][0].transcript.trim();
             const questionText = questions[currentIndex];
 
-            $("#suggestionBox").html("⏳ Processing your answer...");
+            $("#suggestionBox").html("⏳ Evaluating your answer...");
 
             $.ajax({
-                url: "http://localhost:8000/api/technical_questions/feedback",
+                url: "http://localhost:8000/api/technical_questions/score",
                 type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify({
                     question: questionText,
                     answer: transcript
                 }),
-                success: function (response) {
-                    $("#suggestionBox").html(response.feedback || "No suggestions received.");
-                },
+               success: function (response) {
+    let userAnswer = response.user_answer || transcript;
+
+    if (response.correct) {
+        scores += 2;
+        $("#suggestionBox").html(
+            `🧑 Your Answer: "${userAnswer}"<br>` +
+            `✅ Correct! (+2 marks)<br>` +
+            `💡 Feedback: ${response.feedback}`
+        );
+    } else {
+        $("#suggestionBox").html(
+            `🧑 Your Answer: "${userAnswer}"<br>` +
+            `❌ Incorrect (0 marks)<br>` +
+            `💡 Feedback: ${response.feedback}`
+        );
+    }
+},
+
                 error: function () {
-                    $("#suggestionBox").html("Failed to fetch feedback. Please try again.");
+                    $("#suggestionBox").html("Failed to evaluate answer. Please try again.");
                 }
             });
+
+            // stop recording automatically after result
+            recognition.stop();
+            $("#startRecording").text("🎙️ Start Recording").css("background-color", "#10b981");
+            isRecording = false;
         };
 
         recognition.onerror = function () {
             $("#suggestionBox").html("🎤 Voice recognition failed. Please try again.");
+            $("#startRecording").text("🎙️ Start Recording").css("background-color", "#10b981");
+            isRecording = false;
         };
 
         recognition.start();
-    });
+        isRecording = true;
+
+    } else {
+        // ⏹️ Manual stop
+        recognition.stop();
+        $("#startRecording").text("🎙️ Start Recording").css("background-color", "#10b981"); // green
+        isRecording = false;
+    }
+});    
 
     let resumeId = localStorage.getItem("resume_id");
     if (!resumeId) {
-        $("#technicalQuestionBox").html("<p>Resume ID not found. Please register first.</p>");
+        $("#TechnicalQuestionBox").html("<p>Resume ID not found. Please register first.</p>");
         $(".next-button").hide();
         return;
     }
@@ -253,7 +297,7 @@ $(document).ready(function () {
                 showQuestion(currentIndex);
             },
             error: function () {
-                $("#technicalQuestionBox").html("<p>Failed to load Technical questions.</p>");
+                $("#TechnicalQuestionBox").html("<p>Failed to load Technical questions.</p>");
             }
         });
     };
